@@ -1,0 +1,56 @@
+name: Build Toss AIT Bundle
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Web Application
+        env:
+          VITE_TOSS_APP: "true"
+        run: |
+          npm run build
+          ls -la dist/
+
+      - name: Build Official Toss AIT Bundle
+        run: |
+          npm install --no-save @apps-in-toss/cli @apps-in-toss/ait-format @apps-in-toss/ait-format-proto uuidv7
+          echo "Packaging when-end.ait..."
+          node scripts/pack-toss-ait.mjs
+          ls -lh when-end.ait
+
+      - name: Upload AIT Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: when-end-ait
+          path: when-end.ait
+          if-no-files-found: error
+
+      - name: Publish Toss Bundle Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: v1.0.0-toss
+          name: "언제끝나 토스 미니앱 번들 (when-end.ait)"
+          body: "토스 앱인토스(AIT) 공식 번들 규격이 적용된 언제끝나 앱 번들 파일입니다."
+          files: when-end.ait
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
