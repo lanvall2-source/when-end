@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-Host: https://when-end-web.vercel.app
-Sitemap: https://when-end-web.vercel.app/sitemap.xml
+Host: https://when-end-kappa.vercel.app
+Sitemap: https://when-end-kappa.vercel.app/sitemap.xml
